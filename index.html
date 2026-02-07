@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHARK RNG | Global Abyssal God</title>
+    <title>SHARK RNG | Abyssal Hunter</title>
     <style>
         :root {
             --bg: #01060f;
@@ -21,6 +21,30 @@
         }
 
         .overlay { position: fixed; inset: 0; background: #000; z-index: 4000; display: none; flex-direction: column; padding: 40px; }
+
+        /* --- START PAGE STYLES --- */
+        #start-screen {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: radial-gradient(circle, #001a2e 0%, #01060f 100%);
+        }
+        .input-group { margin-top: 30px; text-align: center; }
+        #hunter-name-input {
+            padding: 15px 25px; border-radius: 30px; border: 2px solid var(--accent);
+            background: rgba(0, 242, 255, 0.05); color: white; font-size: 1.2rem;
+            outline: none; text-align: center; width: 250px; transition: 0.3s;
+        }
+
+        /* --- ID CARD STYLES --- */
+        .id-card {
+            width: 350px; background: linear-gradient(135deg, #001a2e 0%, #000 100%);
+            border: 2px solid var(--accent); border-radius: 15px; padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); position: relative; margin: auto;
+        }
+        .id-header { border-bottom: 1px solid var(--accent); padding-bottom: 10px; margin-bottom: 15px; text-align: center; }
+        .id-body { display: flex; align-items: center; gap: 20px; }
+        .id-pfp { font-size: 4rem; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border: 1px solid #333; }
+        .id-info b { color: var(--accent); font-size: 0.8rem; text-transform: uppercase; }
+        .id-info p { margin: 2px 0 10px 0; font-family: monospace; font-size: 1.1rem; }
 
         /* --- SHARK ENGINE --- */
         #shark-engine { position: relative; width: 300px; height: 150px; display: flex; justify-content: center; align-items: center; animation: global-swim 4s infinite ease-in-out; margin: 0 auto; }
@@ -40,23 +64,14 @@
         .p-head { padding: 15px; background: rgba(0, 242, 255, 0.1); text-align: center; font-weight: bold; border-bottom: 1px solid #222; }
         .p-content { flex: 1; overflow-y: auto; padding: 15px; }
 
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 20px; overflow-y: auto; padding-bottom: 40px; }
-        .g-card { background: rgba(255,255,255,0.03); border: 1px solid #222; border-radius: 12px; padding: 15px; text-align: center; }
-        .g-card.locked { opacity: 0.1; filter: grayscale(1); }
-        .g-icon { font-size: 2.5rem; margin-bottom: 5px; display: block; }
-
-        #reveal { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 5000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #rev-icon { font-size: 140px; filter: drop-shadow(0 0 30px var(--accent)); }
-        #rev-name { font-size: 4rem; font-weight: 900; margin: 15px 0; text-transform: uppercase; }
-
-        .btn { padding: 10px 20px; cursor: pointer; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: white; font-weight: bold; }
+        .btn { padding: 10px 20px; cursor: pointer; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: white; font-weight: bold; margin: 5px; transition: 0.2s; }
+        .btn:hover { background: var(--accent); color: black; }
         #roll-btn { padding: 25px 90px; font-size: 1.6rem; border-radius: 60px; background: #fff; color: #000; font-weight: 900; border: none; box-shadow: 0 0 30px var(--accent); cursor: pointer; }
         
-        .perk-row { padding: 12px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; transition: 0.3s; }
-        .perk-row.unlocked { border-color: var(--accent); background: rgba(0, 242, 255, 0.1); box-shadow: inset 0 0 10px rgba(0,242,255,0.1); }
-        .perk-row small { color: #888; display: block; margin-top: 4px; }
+        .perk-row { padding: 12px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; }
+        .perk-row.unlocked { border-color: var(--accent); background: rgba(0, 242, 255, 0.1); }
 
-        .lb-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; font-family: monospace; }
+        .lb-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222; font-family: monospace; }
         #auto-status { color: var(--c-UNCOMMON); font-weight: bold; font-size: 0.8rem; margin-top: 5px; display: none; }
     </style>
 </head>
@@ -64,9 +79,35 @@
 
     <audio id="bg-music" loop><source src="The OneUps - Super Mario Kart - Koopa Beach.mp3" type="audio/mpeg"></audio>
 
-    <div id="start-screen" class="overlay" style="display:flex; justify-content:center; align-items:center;">
-        <h1 style="font-size: 5rem; letter-spacing: 20px; color: var(--accent);">SHARK RNG</h1>
-        <button id="roll-btn" onclick="beginGame()">BEGIN HUNT</button>
+    <div id="start-screen" class="overlay" style="display:flex;">
+        <h1 style="font-size: 5rem; letter-spacing: 20px; color: var(--accent); margin-bottom: 0;">SHARK RNG</h1>
+        <p style="opacity: 0.5; letter-spacing: 5px;">THE DEEP CALLS</p>
+        <div class="input-group">
+            <input type="text" id="hunter-name-input" placeholder="ENTER HUNTER NAME" maxlength="12">
+            <br><br>
+            <button id="roll-btn" onclick="beginGame()">BEGIN HUNT</button>
+        </div>
+    </div>
+
+    <div id="profile-overlay" class="overlay" style="justify-content:center; align-items:center;">
+        <div class="id-card">
+            <div class="id-header">
+                <span style="letter-spacing: 3px; font-size: 0.7rem; opacity: 0.7;">BUREAU OF ABYSSAL RESEARCH</span>
+            </div>
+            <div class="id-body">
+                <div class="id-pfp" id="id-pfp-icon">👤</div>
+                <div class="id-info">
+                    <b>Hunter Name</b>
+                    <p id="id-card-name">---</p>
+                    <b>Registration ID</b>
+                    <p id="id-card-num">#0000-0000</p>
+                    <b>Status</b>
+                    <p id="id-card-status" style="color:var(--accent)">Active</p>
+                </div>
+            </div>
+            <div style="text-align:right; margin-top:10px; font-size:0.6rem; opacity:0.4;">LICENSED ABYSSAL HUNTER</div>
+        </div>
+        <button class="btn" style="margin-top: 30px;" onclick="closeOverlay('profile-overlay')">RETURN TO SHIP</button>
     </div>
 
     <div id="gallery-overlay" class="overlay">
@@ -96,7 +137,7 @@
         <div class="side-panel" id="inventory-panel">
             <div class="p-head">RECENT CATCHES</div>
             <div id="inv-list" class="p-content"></div>
-            <button class="btn" style="margin: 15px;" onclick="openGallery()">COLLECTION BOOK</button>
+            <button class="btn" onclick="openGallery()">COLLECTION BOOK</button>
         </div>
 
         <div style="text-align:center;">
@@ -109,8 +150,9 @@
             <div style="margin-top:80px;">
                 <button id="roll-btn" onclick="roll()">DROP BAIT</button>
                 <div id="auto-status">AUTO-ROLLING ACTIVE</div>
-                <h2 style="margin-top: 10px;">ROLLS: <span id="stat-rolls">0</span></h2>
-                <button class="btn" onclick="openLeaderboard()" style="font-size: 0.8rem; opacity: 0.7;">LEADERBOARD</button>
+                <h2 style="margin-top: 10px;"><span id="player-display-name">HUNTER</span>: <span id="stat-rolls">0</span></h2>
+                <button class="btn" onclick="openProfile()">PROFILE</button>
+                <button class="btn" onclick="openLeaderboard()">LEADERBOARD</button>
             </div>
         </div>
 
@@ -121,7 +163,6 @@
     </div>
 
     <script>
-        // --- KEYS INJECTED ---
         const PUBLIC_KEY = "6986e0d78f40bb1184d15e5a";
         const PRIVATE_KEY = "ghHwJKtK8EC6KQLpunpkagsjFToljWd06";
 
@@ -154,11 +195,30 @@
             { id: 'p8', n: 'Dev Blessing', d: '+50.0x Luck', req: 10000, mult: 50.0 }
         ];
 
-        let state = { rolls: 0, inv: {}, luck: 1.0, name: "", isAuto: false, rolling: false };
+        const PROFILE_EMOJIS = ["🧜‍♂️", "🧜‍♀️", "🐙", "🐡", "🔱", "⚓", "🐋", "🦦", "🌊", "🗺️", "🤿", "🌋"];
+
+        let state = { 
+            rolls: 0, inv: {}, luck: 1.0, 
+            name: "Hunter", isAuto: false, rolling: false,
+            id: "0000-0000", pfp: "👤"
+        };
+
+        function generateID() {
+            const r = () => Math.floor(1000 + Math.random() * 9000);
+            return `${r()}-${r()}`;
+        }
 
         function beginGame() {
-            state.name = prompt("Enter Hunter Name (No Spaces):") || "Hunter";
-            state.name = state.name.replace(/\s/g, '');
+            let val = document.getElementById('hunter-name-input').value.trim();
+            state.name = val ? val.replace(/\s/g, '') : "Hunter";
+            state.id = generateID();
+            state.pfp = PROFILE_EMOJIS[Math.floor(Math.random() * PROFILE_EMOJIS.length)];
+            
+            document.getElementById('player-display-name').innerText = state.name;
+            document.getElementById('id-card-name').innerText = state.name;
+            document.getElementById('id-card-num').innerText = "#" + state.id;
+            document.getElementById('id-pfp-icon').innerText = state.pfp;
+
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('main-game').style.display = 'flex';
             document.getElementById('bg-music').play();
@@ -180,10 +240,11 @@
                     if (Math.random() < (1 / odds)) { tier = r; break; }
                 }
 
-                const item = ITEMS.filter(i => i.r === tier)[Math.floor(Math.random() * ITEMS.filter(i => i.r === tier).length)];
+                const pool = ITEMS.filter(i => i.r === tier);
+                const item = pool[Math.floor(Math.random() * pool.length)];
                 state.inv[item.n] = (state.inv[item.n] || 0) + 1;
 
-                if (state.rolls % 20 === 0) submitScore();
+                if (state.rolls % 10 === 0) submitScore();
 
                 checkPerks();
                 updateUI();
@@ -200,7 +261,7 @@
             state.rolling = false;
             document.getElementById('shark-engine').classList.remove('fast-swim');
             document.getElementById('roll-btn').disabled = false;
-            if (state.isAuto) setTimeout(roll, 200);
+            if (state.isAuto) setTimeout(roll, 250);
         }
 
         function checkPerks() {
@@ -221,7 +282,7 @@
             document.getElementById('rev-name').style.color = RARITIES[item.r].c;
             document.getElementById('rev-odds').innerText = `1 / ${RARITIES[item.r].w.toLocaleString()}`;
             document.getElementById('reveal').style.display = 'flex';
-            if (state.isAuto) setTimeout(closeReveal, 1500);
+            if (state.isAuto) setTimeout(closeReveal, 1200);
         }
 
         function closeReveal() { 
@@ -234,19 +295,21 @@
             document.getElementById('stat-luck').innerText = state.luck.toFixed(1);
             
             const inv = document.getElementById('inv-list');
-            inv.innerHTML = Object.entries(state.inv).reverse().slice(0, 12).map(([n, c]) => {
+            inv.innerHTML = Object.entries(state.inv).reverse().slice(0, 15).map(([n, c]) => {
                 const it = ITEMS.find(x => x.n === n);
-                return `<div style="padding:8px; border-bottom:1px solid #222; color:${RARITIES[it.r].c}; font-size:0.85rem">${it.i} ${n} (x${c})</div>`;
+                return `<div style="padding:8px; border-bottom:1px solid #222; color:${RARITIES[it.r].c}">${it.i} ${n} (x${c})</div>`;
             }).join('');
 
             const pl = document.getElementById('perk-list');
             pl.innerHTML = PERKS.map(p => `
                 <div class="perk-row ${state.rolls >= p.req ? 'unlocked' : ''}">
-                    <b>${p.n}</b>
-                    <small>${p.d} (at ${p.req})</small>
+                    <b style="${state.rolls >= p.req ? 'color:var(--accent)' : 'color:#555'}">${p.n}</b>
+                    <small>${p.d} (${p.req} Rolls)</small>
                 </div>
             `).join('');
         }
+
+        function openProfile() { document.getElementById('profile-overlay').style.display = 'flex'; }
 
         function openGallery() {
             const grid = document.getElementById('gallery-grid');
@@ -263,25 +326,19 @@
 
         function openLeaderboard() {
             document.getElementById('leaderboard-overlay').style.display = 'flex';
-            document.getElementById('lb-list').innerHTML = "Scanning depths...";
+            document.getElementById('lb-list').innerHTML = "Fetching Data...";
             fetch(`https://www.dreamlo.com/lb/${PUBLIC_KEY}/json`)
                 .then(r => r.json()).then(d => {
-                    if (!d.dreamlo.leaderboard) { document.getElementById('lb-list').innerHTML = "No legends yet."; return; }
+                    if (!d.dreamlo.leaderboard) { document.getElementById('lb-list').innerHTML = "No Legends Yet!"; return; }
                     let e = d.dreamlo.leaderboard.entry;
                     if(!Array.isArray(e)) e = [e];
                     document.getElementById('lb-list').innerHTML = e.map((i, idx) => `
-                        <div class="lb-row">
-                            <span>#${idx+1} ${i.name}</span>
-                            <span style="color:var(--accent)">${i.score} Rolls</span>
-                        </div>
+                        <div class="lb-row"><span>#${idx+1} ${i.name}</span><span style="color:var(--accent)">${i.score} Rolls</span></div>
                     `).join('');
-                }).catch(() => { document.getElementById('lb-list').innerHTML = "Server Busy!"; });
+                });
         }
 
-        function submitScore() {
-            fetch(`https://www.dreamlo.com/lb/${PRIVATE_KEY}/add/${state.name}/${state.rolls}`);
-        }
-
+        function submitScore() { fetch(`https://www.dreamlo.com/lb/${PRIVATE_KEY}/add/${state.name}/${state.rolls}`); }
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
     </script>
 </body>
