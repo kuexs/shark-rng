@@ -75,9 +75,9 @@
     <div id="start-screen" class="overlay" style="display:flex;">
         <h1 style="font-size: 4rem; letter-spacing: 15px; color: var(--accent); margin: 0;">SHARK RNG</h1>
         <div class="login-box">
-            <p>Enter details to Load or Create account</p>
+            <p>Enter details to Save/Load progress</p>
             <input type="text" id="user-input" placeholder="USERNAME" maxlength="12">
-            <input type="password" id="pass-input" placeholder="PASSWORD">
+            <input type="password" id="pass-input" placeholder="PASSWORD (For Save)">
             <button id="roll-btn" style="font-size:1.2rem; padding:15px 40px;" onclick="beginGame()">LOG IN & HUNT</button>
         </div>
     </div>
@@ -96,8 +96,11 @@
     </div>
 
     <div id="leaderboard-overlay" class="overlay">
-        <h2>GLOBAL RANKINGS</h2>
-        <div id="lb-list" style="flex:1; overflow-y:auto;"></div>
+        <div style="display:flex; justify-content:space-between;">
+            <h2>GLOBAL RANKINGS</h2>
+            <button class="btn" onclick="openLeaderboard()">REFRESH</button>
+        </div>
+        <div id="lb-list" style="flex:1; overflow-y:auto; margin-top:20px;"></div>
         <button class="btn" onclick="closeOverlay('leaderboard-overlay')">CLOSE</button>
     </div>
 
@@ -130,8 +133,9 @@
     </div>
 
     <script>
-        const PUBLIC_KEY = "6986e0d78f40bb1184d15e5a";
-        const PRIVATE_KEY = "ghHwJKtK8EC6KQLpunpkagsjFToljWd06";
+        // ADD YOUR KEYS HERE
+        const PUBLIC_KEY = "6986e0d78f40bb1184d15e5a"; 
+        const PRIVATE_KEY = "ghHwJKtK8EC6KQLpunpkagsjFToljWd06"; 
 
         const RARITIES = {
             COMMON: { w: 1, c: "#a0a0a0" }, UNCOMMON: { w: 5, c: "#4caf50" },
@@ -169,17 +173,23 @@
             const p = document.getElementById('pass-input').value.trim();
             if(!u || !p) return alert("Enter Name & Password!");
             
-            state.name = u; state.pass = p;
+            state.name = u.replace(/\s/g, ''); 
+            state.pass = p;
             
-            // Try to LOAD from leaderboard
-            const res = await fetch(`https://www.dreamlo.com/lb/${PUBLIC_KEY}/json`);
-            const data = await res.json();
-            if(data.dreamlo.leaderboard) {
-                let e = data.dreamlo.leaderboard.entry;
-                if(!Array.isArray(e)) e = [e];
-                const myEntry = e.find(x => x.name === state.name);
-                if(myEntry) state.rolls = parseInt(myEntry.score);
-            }
+            // 1. Force upload to Dreamlo so server wakes up
+            submitScore();
+
+            // 2. Try to LOAD
+            try {
+                const res = await fetch(`https://www.dreamlo.com/lb/${PUBLIC_KEY}/json`);
+                const data = await res.json();
+                if(data.dreamlo.leaderboard && data.dreamlo.leaderboard.entry) {
+                    let e = data.dreamlo.leaderboard.entry;
+                    if(!Array.isArray(e)) e = [e];
+                    const myEntry = e.find(x => x.name === state.name);
+                    if(myEntry) state.rolls = parseInt(myEntry.score);
+                }
+            } catch(e) { console.log("LB initialization..."); }
 
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('main-game').style.display = 'flex';
@@ -278,14 +288,27 @@
 
         function openLeaderboard() {
             document.getElementById('leaderboard-overlay').style.display = 'flex';
+            document.getElementById('lb-list').innerHTML = "Scanning Depths...";
             fetch(`https://www.dreamlo.com/lb/${PUBLIC_KEY}/json`).then(r => r.json()).then(d => {
+                if(!d.dreamlo.leaderboard || !d.dreamlo.leaderboard.entry) {
+                    document.getElementById('lb-list').innerHTML = "No Legends Found. Be the first!";
+                    return;
+                }
                 let e = d.dreamlo.leaderboard.entry;
                 if(!Array.isArray(e)) e = [e];
-                document.getElementById('lb-list').innerHTML = e.map(i => `<div class="lb-row"><span>${i.name}</span><span>${i.score}</span></div>`).join('');
+                document.getElementById('lb-list').innerHTML = e.sort((a,b) => b.score - a.score).map((i, index) => `
+                    <div class="lb-row">
+                        <span>#${index+1} ${i.name}</span>
+                        <span style="color:var(--accent)">${i.score}</span>
+                    </div>`).join('');
+            }).catch(e => {
+                document.getElementById('lb-list').innerHTML = "Error connecting to deep sea servers.";
             });
         }
 
-        function submitScore() { fetch(`https://www.dreamlo.com/lb/${PRIVATE_KEY}/add/${state.name}/${state.rolls}`); }
+        function submitScore() { 
+            fetch(`https://www.dreamlo.com/lb/${PRIVATE_KEY}/add/${state.name}/${state.rolls}`); 
+        }
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
     </script>
 </body>
