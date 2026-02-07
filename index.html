@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHARK RNG: Abyssal Depths</title>
+    <style>
+        :root {
+            --bg: #020b1a;
+            --water: #0077be;
+            --accent: #00f2ff;
+            --panel: rgba(0, 20, 40, 0.9);
+            
+            /* Rarity Colors */
+            --common: #a0a0a0;
+            --uncommon: #4caf50;
+            --rare: #2196f3;
+            --epic: #9c27b0;
+            --legendary: #ffc107;
+            --abyssal: #ff3d00;
+            --sunken: #00ffcc;
+            --prehistoric: #ffffff;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); color: white; overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- START SCREEN --- */
+        #start-screen {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: radial-gradient(circle, #051937, #000c1d);
+            z-index: 1000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; transition: 0.8s;
+        }
+        #start-screen h1 { font-size: 4rem; margin: 0; text-shadow: 0 0 20px var(--accent); letter-spacing: 10px; }
+        .start-btn {
+            margin-top: 30px; padding: 15px 50px; font-size: 1.5rem;
+            background: transparent; border: 2px solid var(--accent);
+            color: var(--accent); cursor: pointer; border-radius: 50px;
+            transition: 0.3s; font-weight: bold;
+        }
+        .start-btn:hover { background: var(--accent); color: black; box-shadow: 0 0 30px var(--accent); }
+
+        /* --- THE SHARK TANK (3D Fin) --- */
+        .tank-container {
+            position: relative; width: 300px; height: 300px;
+            perspective: 600px; display: flex; justify-content: center; align-items: center;
+        }
+        .ocean-glow {
+            position: absolute; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(0,242,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s infinite alternate;
+        }
+        .shark-pivot {
+            width: 100px; height: 100px; transform-style: preserve-3d;
+            animation: swim 4s infinite ease-in-out;
+        }
+        .fin {
+            width: 0; height: 0; 
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 80px solid var(--accent);
+            transform: rotateX(20deg);
+            filter: drop-shadow(0 0 15px var(--accent));
+        }
+
+        @keyframes swim {
+            0% { transform: rotateY(-30deg) translateX(-20px); }
+            50% { transform: rotateY(30deg) translateX(20px); }
+            100% { transform: rotateY(-30deg) translateX(-20px); }
+        }
+        @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.7; } }
+
+        /* --- UI LAYOUT --- */
+        #main-game { display: none; height: 100%; flex-direction: column; justify-content: space-between; padding: 20px; }
+        
+        .top-bar { text-align: center; }
+        .stat-box { font-family: monospace; font-size: 1.2rem; color: var(--accent); }
+
+        .side-panel {
+            position: absolute; top: 100px; width: 260px; height: 65%;
+            background: var(--panel); border: 1px solid rgba(0,242,255,0.2);
+            border-radius: 15px; display: flex; flex-direction: column; overflow: hidden;
+        }
+        #inventory { left: 20px; }
+        #upgrades { right: 20px; }
+        .p-title { padding: 15px; background: rgba(0,242,255,0.1); text-align: center; font-weight: bold; }
+        .p-content { flex: 1; overflow-y: auto; padding: 10px; }
+
+        /* --- REVEAL OVERLAY --- */
+        #reveal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 500; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        #reveal-icon { font-size: 8rem; margin-bottom: 10px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #reveal-name { font-size: 3rem; font-weight: 900; text-transform: uppercase; }
+        #reveal-rarity { letter-spacing: 5px; margin-top: 10px; }
+
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Items */
+        .item-row {
+            display: flex; align-items: center; gap: 10px; padding: 8px;
+            background: rgba(255,255,255,0.05); margin-bottom: 5px; border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Perks */
+        .perk-card {
+            padding: 10px; border: 1px solid #333; border-radius: 5px; margin-bottom: 10px;
+            opacity: 0.4; transition: 0.3s;
+        }
+        .perk-card.bought { opacity: 1; border-color: var(--accent); background: rgba(0,242,255,0.05); }
+
+        /* Roll Button */
+        .roll-area { text-align: center; margin-bottom: 40px; }
+        #roll-btn {
+            padding: 20px 80px; font-size: 1.5rem; font-weight: bold;
+            background: var(--accent); color: black; border: none;
+            border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px var(--accent);
+        }
+        #roll-btn:disabled { background: #444; box-shadow: none; cursor: wait; }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1>SHARK RNG</h1>
+        <p>Explore the Abyssal Depths</p>
+        <button class="start-btn" onclick="startGame()">ENTER THE WATER</button>
+    </div>
+
+    <div id="reveal-overlay" onclick="closeReveal()">
+        <div id="reveal-icon">🦈</div>
+        <div id="reveal-name">Baby Shark</div>
+        <div id="reveal-rarity">COMMON</div>
+        <p style="margin-top: 40px; color: #888;">Click to continue</p>
+    </div>
+
+    <div id="main-game">
+        <div class="top-bar">
+            <div class="stat-box">ROLLS: <span id="val-rolls">0</span> | LUCK: <span id="val-luck">1.0</span>x</div>
+        </div>
+
+        <div id="inventory" class="side-panel">
+            <div class="p-title">COLLECTION</div>
+            <div class="p-content" id="inv-list"></div>
+        </div>
+
+        <div style="display: flex; justify-content: center; align-items: center; flex: 1;">
+            <div class="tank-container">
+                <div class="ocean-glow"></div>
+                <div class="shark-pivot">
+                    <div class="fin"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="upgrades" class="side-panel">
+            <div class="p-title">PERKS</div>
+            <div class="p-content">
+                <div class="perk-card" id="pk-1"><b>Turbo Fins</b><br><small>Roll 2x faster (10 Rolls)</small></div>
+                <div class="perk-card" id="pk-2"><b>Sonar Sight</b><br><small>+0.5 Luck (50 Rolls)</small></div>
+                <div class="perk-card" id="pk-3"><b>Pity Magnet</b><br><small>Better Pity odds (150 Rolls)</small></div>
+                <div class="perk-card" id="pk-4"><b>Auto-Fisher</b><br><small>Auto-roll toggle (300 Rolls)</small></div>
+                <button id="auto-btn" onclick="toggleAuto()" style="display:none; width:100%; cursor:pointer;">AUTO: OFF</button>
+            </div>
+        </div>
+
+        <div class="roll-area">
+            <button id="roll-btn" onclick="roll()">DROP BAIT</button>
+        </div>
+    </div>
+
+    <script>
+        const RARITIES = {
+            COMMON: { n: "Mundane", c: "#a0a0a0", w: 5000 },
+            UNCOMMON: { n: "Curious", c: "#4caf50", w: 2500 },
+            RARE: { n: "Polished", c: "#2196f3", w: 1000 },
+            EPIC: { n: "Remarkable", c: "#9c27b0", w: 400 },
+            LEGENDARY: { n: "Mythic", c: "#ffc107", w: 100 },
+            ABYSSAL: { n: "Abyssal", c: "#ff3d00", w: 30 },
+            SUNKEN: { n: "Sunken", c: "#00ffcc", w: 5 },
+            PREHISTORIC: { n: "Prehistoric", c: "#ffffff", w: 1 }
+        };
+
+        const ITEMS = [
+            { n: "Tiny Guppy", i: "🐟", r: "COMMON" },
+            { n: "Baby Shark", i: "🦈", r: "COMMON" },
+            { n: "Old Boot", i: "🥾", r: "COMMON" },
+            { n: "Seaweed Bundle", i: "🌿", r: "UNCOMMON" },
+            { n: "Crab King", i: "🦀", r: "UNCOMMON" },
+            { n: "Glowing Jelly", i: "🎐", r: "RARE" },
+            { n: "Electric Eel", i: "🐍", r: "RARE" },
+            { n: "Treasure Chest", i: "🪙", r: "EPIC" },
+            { n: "Giant Squid", i: "🦑", r: "EPIC" },
+            { n: "Great White", i: "🦈", r: "LEGENDARY" },
+            { n: "Whale Shark", i: "🐋", r: "LEGENDARY" },
+            { n: "Magma Shark", i: "🌋", r: "ABYSSAL" },
+            { n: "Ghost Shark", i: "👻", r: "ABYSSAL" },
+            { n: "Poseidon's Fork", i: "🔱", r: "SUNKEN" },
+            { n: "Megalodon", i: "🦴", r: "PREHISTORIC" }
+        ];
+
+        let state = { rolls: 0, inv: {}, perks: { s:0, l:0, p:0, a:0 }, auto: false };
+
+        function startGame() {
+            document.getElementById('start-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('start-screen').style.display = 'none';
+                document.getElementById('main-game').style.display = 'flex';
+            }, 800);
+            load();
+        }
+
+        function roll() {
+            if (state.rolling) return;
+            state.rolling = true;
+            state.rolls++;
+            document.getElementById('roll-btn').disabled = true;
+
+            // Fin speed animation
+            document.querySelector('.shark-pivot').style.animationDuration = '0.3s';
+
+            let time = state.perks.s ? 400 : 1000;
+            setTimeout(finalizeRoll, time);
+        }
+
+        function finalizeRoll() {
+            let luck = 1 + (state.perks.l ? 0.5 : 0);
+            let pool = [];
+            for (let r in RARITIES) {
+                let weight = RARITIES[r].w;
+                if (r !== "COMMON") weight *= luck;
+                pool.push({k: r, w: weight});
+            }
+
+            let total = pool.reduce((a, b) => a + b.w, 0);
+            let rand = Math.random() * total;
+            let tier = "COMMON";
+            for (let p of pool) {
+                if (rand < p.w) { tier = p.k; break; }
+                rand -= p.w;
+            }
+
+            const possible = ITEMS.filter(i => i.r === tier);
+            const item = possible[Math.floor(Math.random() * possible.length)];
+
+            // Update state
+            if (!state.inv[item.n]) state.inv[item.n] = { ...item, count: 0 };
+            state.inv[item.n].count++;
+
+            // Reveal
+            showReveal(item);
+            
+            // Cleanup
+            document.querySelector('.shark-pivot').style.animationDuration = '4s';
+            checkUnlocks();
+            updateUI();
+            save();
+            state.rolling = false;
+
+            if (!state.auto) {
+                setTimeout(() => document.getElementById('roll-btn').disabled = false, 200);
+            }
+        }
+
+        function showReveal(item) {
+            const overlay = document.getElementById('reveal-overlay');
+            const icon = document.getElementById('reveal-icon');
+            const name = document.getElementById('reveal-name');
+            const rar = document.getElementById('reveal-rarity');
+
+            icon.innerText = item.i;
+            name.innerText = item.n;
+            name.style.color = RARITIES[item.r].c;
+            rar.innerText = item.r;
+            rar.style.color = RARITIES[item.r].c;
+
+            overlay.style.display = 'flex';
+            if (state.auto) {
+                setTimeout(closeReveal, 800);
+            }
+        }
+
+        function closeReveal() {
+            document.getElementById('reveal-overlay').style.display = 'none';
+            if (!state.auto) document.getElementById('roll-btn').disabled = false;
+        }
+
+        function checkUnlocks() {
+            if (state.rolls >= 10) state.perks.s = 1;
+            if (state.rolls >= 50) state.perks.l = 1;
+            if (state.rolls >= 150) state.perks.p = 1;
+            if (state.rolls >= 300) state.perks.a = 1;
+        }
+
+        function toggleAuto() {
+            state.auto = !state.auto;
+            document.getElementById('auto-btn').innerText = state.auto ? "AUTO: ON" : "AUTO: OFF";
+            if (state.auto) autoLoop();
+        }
+
+        function autoLoop() {
+            if (!state.auto) return;
+            roll();
+            setTimeout(autoLoop, state.perks.s ? 1500 : 2500);
+        }
+
+        function updateUI() {
+            document.getElementById('val-rolls').innerText = state.rolls;
+            document.getElementById('val-luck').innerText = (1 + (state.perks.l ? 0.5 : 0)).toFixed(1);
+
+            if(state.perks.s) document.getElementById('pk-1').classList.add('bought');
+            if(state.perks.l) document.getElementById('pk-2').classList.add('bought');
+            if(state.perks.p) document.getElementById('pk-3').classList.add('bought');
+            if(state.perks.a) {
+                document.getElementById('pk-4').classList.add('bought');
+                document.getElementById('auto-btn').style.display = 'block';
+            }
+
+            const list = document.getElementById('inv-list');
+            list.innerHTML = "";
+            const sorted = Object.values(state.inv).sort((a,b) => {
+                const order = ["PREHISTORIC", "SUNKEN", "ABYSSAL", "LEGENDARY", "EPIC", "RARE", "UNCOMMON", "COMMON"];
+                return order.indexOf(a.r) - order.indexOf(b.r);
+            });
+
+            sorted.forEach(i => {
+                list.innerHTML += `<div class="item-row" style="border-left: 3px solid ${RARITIES[i.r].c}">
+                    <span>${i.i}</span>
+                    <div style="flex:1"><b>${i.n}</b><br><small style="color:${RARITIES[i.r].c}">${i.r}</small></div>
+                    <span>x${i.count}</span>
+                </div>`;
+            });
+        }
+
+        function save() { localStorage.setItem('shark_rng_v1', JSON.stringify(state)); }
+        function load() {
+            const s = localStorage.getItem('shark_rng_v1');
+            if (s) {
+                const parsed = JSON.parse(s);
+                state = { ...state, ...parsed };
+                updateUI();
+            }
+        }
+    </script>
+</body>
+</html>
