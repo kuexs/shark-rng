@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHARK RNG | HUNTER ID</title>
+    <title>SHARK RNG | ABYSSAL HUNTER</title>
     <style>
         :root {
             --bg: #01060f; --accent: #00f2ff; --panel: rgba(0, 15, 30, 0.95);
@@ -11,100 +11,97 @@
             --c-EPIC: #9c27b0; --c-LEGENDARY: #ffc107; --c-ABYSSAL: #ff3d00;
             --c-SUNKEN: #00ffcc; --c-PREHISTORIC: #ffffff;
         }
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 4000; display: none; flex-direction: column; padding: 40px; align-items: center; justify-content: center; }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; user-select: none; }
         
-        /* ID CARD */
-        .id-card {
-            width: 340px; background: linear-gradient(135deg, #001a2e 0%, #000 100%);
-            border: 2px solid var(--accent); border-radius: 15px; padding: 25px;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3); position: relative;
-        }
-        .id-pfp { font-size: 4rem; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
-        .id-info b { color: var(--accent); font-size: 0.8rem; letter-spacing: 1px; }
+        /* --- SHARK ENGINE --- */
+        #shark-container { margin: 20px auto; width: 300px; height: 150px; position: relative; }
+        #shark-engine { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; animation: global-swim 4s infinite ease-in-out; }
+        .shark-part { position: absolute; background: var(--accent); box-shadow: 0 0 20px var(--accent); transition: 0.3s; }
+        .shark-body { width: 130px; height: 55px; border-radius: 50% 50% 40% 40%; left: 85px; }
+        .shark-fin { width: 0; height: 0; border-left: 25px solid transparent; border-right: 25px solid transparent; border-bottom: 45px solid var(--accent); top: 15px; left: 125px; }
+        .shark-tail { width: 0; height: 0; border-top: 30px solid transparent; border-bottom: 30px solid transparent; border-left: 45px solid var(--accent); left: 50px; animation: tail-wag 0.6s infinite ease-in-out; }
+        
+        @keyframes global-swim { 0%, 100% { transform: translateX(-30px); } 50% { transform: translateX(30px); } }
+        @keyframes tail-wag { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(50deg); } }
+        .frenzy { animation-duration: 0.2s !important; }
 
-        /* PANELS */
-        .side-panel { position: absolute; top: 80px; bottom: 40px; width: 260px; background: var(--panel); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
+        /* --- UI OVERLAYS --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .id-card { width: 320px; background: linear-gradient(145deg, #001a2e, #000); border: 2px solid var(--accent); border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 0 40px rgba(0, 242, 255, 0.4); }
+        
+        /* --- MAIN GAME --- */
+        .side-panel { position: absolute; top: 20px; bottom: 20px; width: 250px; background: var(--panel); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
         #inventory-panel { left: 20px; } #perks-panel { right: 20px; }
-        .p-content { flex:1; overflow-y: auto; padding: 15px; }
+        .p-content { flex: 1; overflow-y: auto; padding: 15px; }
         
-        .btn { padding: 10px 20px; cursor: pointer; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: white; font-weight: bold; margin: 5px; }
-        #roll-btn { padding: 20px 60px; font-size: 1.5rem; border-radius: 50px; background: #fff; color: #000; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 0 20px var(--accent); }
+        #roll-btn { padding: 20px 50px; font-size: 1.8rem; border-radius: 50px; background: #fff; color: #000; font-weight: 900; border: none; cursor: pointer; transition: 0.2s; box-shadow: 0 0 30px var(--accent); }
+        #roll-btn:active { transform: scale(0.9); }
         
-        .g-card { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #222; }
-        .locked { opacity: 0.15; filter: grayscale(1); }
-        #save-status { position: fixed; bottom: 10px; right: 10px; font-size: 0.7rem; color: var(--accent); }
+        .btn { padding: 8px 15px; background: transparent; border: 1px solid var(--accent); color: white; border-radius: 5px; cursor: pointer; margin: 5px; font-weight: bold; }
+        .g-card { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
-    <audio id="bg-music" loop><source src="https://ia800504.us.archive.org/33/items/super-mario-kart-koopa-beach/Koopa%20Beach.mp3" type="audio/mpeg"></audio>
+    <audio id="bg-music" loop><source src="https://ia804500.us.archive.org/27/items/super-mario-kart-koopa-beach-music/Super%20Mario%20Kart%20-%20Koopa%20Beach.mp3" type="audio/mpeg"></audio>
 
     <div id="start-screen" class="overlay" style="display:flex;">
-        <h1 style="color:var(--accent); letter-spacing:10px;">SHARK RNG</h1>
-        <div style="background: rgba(0, 242, 255, 0.05); padding: 30px; border-radius: 20px; border: 1px solid var(--accent); text-align: center;">
-            <input type="text" id="user-input" placeholder="USERNAME" style="display:block; margin: 10px auto; padding: 12px; border-radius: 10px; background:#000; color:#fff; border:1px solid #333; text-align:center;">
-            <input type="password" id="pass-input" placeholder="PASSWORD" style="display:block; margin: 10px auto; padding: 12px; border-radius: 10px; background:#000; color:#fff; border:1px solid #333; text-align:center;">
-            <button class="btn" onclick="beginGame()">LOG IN</button>
+        <h1 style="color:var(--accent); font-size: 3rem; letter-spacing: 10px;">SHARK RNG</h1>
+        <div class="id-card">
+            <input type="text" id="user-input" placeholder="USERNAME" maxlength="12" style="width:80%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid var(--accent); border-radius:5px; text-align:center;">
+            <input type="password" id="pass-input" placeholder="PASSWORD" style="width:80%; padding:10px; margin-bottom:10px; background:#000; color:#fff; border:1px solid var(--accent); border-radius:5px; text-align:center;">
+            <button class="btn" style="width:85%; padding:15px;" onclick="beginGame()">LOG IN & SYNC</button>
         </div>
+        <p style="font-size:0.7rem; margin-top:10px; color:#555;">Music will start after login</p>
     </div>
 
     <div id="profile-overlay" class="overlay">
         <div class="id-card">
-            <div style="display:flex; gap:20px; align-items:center;">
-                <div id="id-pfp-display" class="id-pfp">🐙</div>
-                <div class="id-info">
-                    <b>HUNTER NAME</b><br>
-                    <span id="id-name" style="font-size:1.4rem;">---</span><br>
-                    <b>SERIAL ID</b><br>
-                    <span id="id-number" style="font-family:monospace; color:#888;">#0000</span>
-                </div>
-            </div>
-            <hr style="border:0; border-top:1px solid #222; margin:20px 0;">
-            <div style="display:flex; justify-content:space-around; text-align:center;">
+            <div id="id-pfp" style="font-size:4rem; margin-bottom:10px;">🐙</div>
+            <h2 id="id-name" style="margin:0;">---</h2>
+            <p id="id-number" style="color:var(--accent); font-family:monospace; margin-top:0;">#0000</p>
+            <div style="display:flex; justify-content:space-around; border-top:1px solid #222; padding-top:15px;">
                 <div><b>ROLLS</b><br><span id="id-rolls">0</span></div>
-                <div><b>RANK</b><br><span id="id-rank" style="color:#00ff00;">ROOKIE</span></div>
+                <div><b>LUCK</b><br><span id="id-luck">1.0x</span></div>
             </div>
+            <button class="btn" style="margin-top:20px; width:100%;" onclick="closeOverlay('profile-overlay')">RETURN</button>
         </div>
-        <button class="btn" style="margin-top:20px;" onclick="closeOverlay('profile-overlay')">BACK TO HUNT</button>
     </div>
 
-    <div id="gallery-overlay" class="overlay">
-        <h2>COLLECTION BOOK</h2>
-        <div id="gallery-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap:10px; width:100%; overflow-y:auto;"></div>
-        <button class="btn" onclick="closeOverlay('gallery-overlay')">CLOSE</button>
-    </div>
-
-    <div id="main-game" style="display:none; height:100%; flex-direction:column; align-items:center; padding:20px;">
+    <div id="main-game" style="display:none; height:100%; flex-direction:column; align-items:center; justify-content:center;">
         <div class="side-panel" id="inventory-panel">
-            <div style="padding:10px; text-align:center; background:rgba(0,242,255,0.1)">RECENT CATCHES</div>
+            <div style="padding:15px; text-align:center; background:rgba(0,242,255,0.1); font-weight:bold;">INVENTORY</div>
             <div id="inv-list" class="p-content"></div>
             <button class="btn" onclick="openGallery()">COLLECTION BOOK</button>
         </div>
 
-        <div style="text-align:center; flex:1; display:flex; flex-direction:column; justify-content:center;">
-            <h1 id="luck-display" style="color:var(--accent)">LUCK: 1.0x</h1>
-            <div style="font-size:80px; margin:20px 0;">🦈</div>
+        <div style="text-align:center;">
+            <h2 id="luck-stat" style="color:var(--accent); letter-spacing:3px;">LUCK: 1.0x</h2>
+            <div id="shark-container">
+                <div id="shark-engine">
+                    <div class="shark-tail shark-part"></div>
+                    <div class="shark-body shark-part"></div>
+                    <div class="shark-fin shark-part"></div>
+                </div>
+            </div>
             <button id="roll-btn" onclick="roll()">DROP BAIT</button>
-            <h2 id="roll-display">ROLLS: 0</h2>
-            <div style="margin-top:10px;">
-                <button class="btn" onclick="openProfile()">VIEW PROFILE</button>
-                <button class="btn" onclick="manualSave()">SAVE TO CLOUD</button>
+            <h1 id="roll-stat" style="margin-top:20px;">ROLLS: 0</h1>
+            <div>
+                <button class="btn" onclick="openProfile()">MY PROFILE</button>
+                <button class="btn" onclick="manualSave()" id="save-btn">CLOUD SAVE</button>
             </div>
         </div>
 
         <div class="side-panel" id="perks-panel">
-            <div style="padding:10px; text-align:center; background:rgba(0,242,255,0.1)">ASCENSION PERKS</div>
+            <div style="padding:15px; text-align:center; background:rgba(0,242,255,0.1); font-weight:bold;">PERKS</div>
             <div id="perk-list" class="p-content"></div>
         </div>
     </div>
 
-    <div id="save-status"></div>
-
     <script>
         const PUBLIC_KEY = "6986e0d78f40bb1184d15e5a";
         const PRIVATE_KEY = "ghHwJKtK8EC6KQLpunpkagsjFToljWd06";
-        const EMOJIS = ["🐙","🐡","🦑","🦈","🐬","🐋","🦀","🐚","🌊","🧜‍♂️"];
+        const EMOJIS = ["🐙","🐡","🦑","🦈","🐬","🐋","🦀","🐚","🌊","🧜‍♂️","🔱","🐠"];
 
         const RARITIES = {
             COMMON: { w: 1, c: "#a0a0a0" }, UNCOMMON: { w: 5, c: "#4caf50" },
@@ -116,7 +113,8 @@
         const ITEMS = [
             { n: "Tiny Guppy", i: "🐟", r: "COMMON" }, { n: "Old Boot", i: "🥾", r: "COMMON" },
             { n: "Baby Shark", i: "🦈", r: "UNCOMMON" }, { n: "Seaweed", i: "🌿", r: "UNCOMMON" },
-            { n: "Crab King", i: "🦀", r: "RARE" }, { n: "Giant Squid", i: "🦑", r: "EPIC" },
+            { n: "Crab King", i: "🦀", r: "RARE" }, { n: "Electric Eel", i: "🐍", r: "RARE" },
+            { n: "Giant Squid", i: "🦑", r: "EPIC" }, { n: "Zombie Shark", i: "🧟", r: "EPIC" },
             { n: "Great White", i: "🦈", r: "LEGENDARY" }, { n: "Whale Shark", i: "🐋", r: "LEGENDARY" },
             { n: "Magma Shark", i: "🌋", r: "ABYSSAL" }, { n: "Ghost Shark", i: "👻", r: "ABYSSAL" },
             { n: "Poseidon Fork", i: "🔱", r: "SUNKEN" }, { n: "Megalodon", i: "🦴", r: "PREHISTORIC" }
@@ -124,7 +122,7 @@
 
         const PERKS = [
             { n: 'Shiny Lure', req: 25, mult: 1.5 }, { n: 'AUTO-ROLL', req: 50, auto: true },
-            { n: 'Abyssal Light', req: 150, mult: 3.0 }, { n: 'Oceanic God', req: 2000, mult: 20.0 }
+            { n: 'Abyssal Light', req: 150, mult: 3.0 }, { n: 'Oceanic God', req: 1000, mult: 15.0 }
         ];
 
         let state = { rolls: 0, inv: {}, luck: 1.0, name: "", pfp: "🐙", idNum: "0000", isAuto: false, rolling: false };
@@ -143,8 +141,8 @@
                     const decoded = JSON.parse(atob(myData.text));
                     state.rolls = parseInt(myData.score);
                     state.inv = decoded.inv;
-                    state.pfp = decoded.pfp || EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
-                    state.idNum = decoded.idNum || Math.floor(1000 + Math.random()*9000);
+                    state.pfp = decoded.pfp;
+                    state.idNum = decoded.idNum;
                 } else {
                     state.pfp = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
                     state.idNum = Math.floor(1000 + Math.random()*9000);
@@ -156,7 +154,7 @@
 
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('main-game').style.display = 'flex';
-            document.getElementById('bg-music').play().catch(()=>{});
+            document.getElementById('bg-music').play().catch(() => console.log("Music blocked by browser"));
             updateUI();
         }
 
@@ -165,65 +163,58 @@
             state.rolling = true;
             state.rolls++;
             
-            let tier = "COMMON";
-            const sorted = Object.keys(RARITIES).sort((a,b) => RARITIES[b].w - RARITIES[a].w);
-            for (let r of sorted) {
-                if (Math.random() < (1 / (r === "COMMON" ? 1 : RARITIES[r].w / state.luck))) { tier = r; break; }
-            }
+            const engine = document.getElementById('shark-engine');
+            engine.classList.add('frenzy');
 
-            const pool = ITEMS.filter(i => i.r === tier);
-            const item = pool[Math.floor(Math.random() * pool.length)];
-            state.inv[item.n] = (state.inv[item.n] || 0) + 1;
+            setTimeout(() => {
+                let tier = "COMMON";
+                const sorted = Object.keys(RARITIES).sort((a,b) => RARITIES[b].w - RARITIES[a].w);
+                for (let r of sorted) {
+                    if (Math.random() < (1 / (r === "COMMON" ? 1 : RARITIES[r].w / state.luck))) { tier = r; break; }
+                }
 
-            if(state.rolls % 15 === 0) manualSave();
-            checkPerks();
-            updateUI();
-            state.rolling = false;
+                const pool = ITEMS.filter(i => i.r === tier);
+                const item = pool[Math.floor(Math.random() * pool.length)];
+                state.inv[item.n] = (state.inv[item.n] || 0) + 1;
+
+                engine.classList.remove('frenzy');
+                updateUI();
+                state.rolling = false;
+                if(state.isAuto) setTimeout(roll, 500);
+            }, 400);
         }
 
         function manualSave() {
-            document.getElementById('save-status').innerText = "Syncing...";
+            const btn = document.getElementById('save-btn');
+            btn.innerText = "...";
             const dataToSave = btoa(JSON.stringify({inv: state.inv, pfp: state.pfp, idNum: state.idNum}));
             fetch(`https://www.dreamlo.com/lb/${PRIVATE_KEY}/add/${state.name}/${state.rolls}/0/${dataToSave}`)
-                .then(() => document.getElementById('save-status').innerText = "Synced ✅");
+                .then(() => { btn.innerText = "SAVED!"; setTimeout(()=>btn.innerText="CLOUD SAVE", 2000); });
+        }
+
+        function updateUI() {
+            document.getElementById('roll-stat').innerText = `ROLLS: ${state.rolls}`;
+            document.getElementById('luck-stat').innerText = `LUCK: ${state.luck.toFixed(1)}x`;
+            
+            let mult = 1.0;
+            PERKS.forEach(p => { if(state.rolls >= p.req) { mult = p.mult || mult; if(p.auto) state.isAuto = true; } });
+            state.luck = mult;
+
+            document.getElementById('inv-list').innerHTML = Object.entries(state.inv).reverse().slice(0,10).map(([n,c])=>{
+                const it = ITEMS.find(x=>x.n===n);
+                return `<div style="color:${RARITIES[it.r].c}">${it.i} ${n} x${c}</div>`;
+            }).join('');
+
+            document.getElementById('perk-list').innerHTML = PERKS.map(p=>`<div style="opacity:${state.rolls>=p.req?1:0.3}">${p.n} (${p.req})</div>`).join('');
         }
 
         function openProfile() {
             document.getElementById('id-name').innerText = state.name;
-            document.getElementById('id-pfp-display').innerText = state.pfp;
+            document.getElementById('id-pfp').innerText = state.pfp;
             document.getElementById('id-number').innerText = "#" + state.idNum;
             document.getElementById('id-rolls').innerText = state.rolls;
-            document.getElementById('id-rank').innerText = state.rolls > 1000 ? "ABYSSAL MASTER" : "HUNTER";
+            document.getElementById('id-luck').innerText = state.luck.toFixed(1) + "x";
             document.getElementById('profile-overlay').style.display = 'flex';
-        }
-
-        function openGallery() {
-            document.getElementById('gallery-grid').innerHTML = ITEMS.map(it => {
-                const owned = state.inv[it.n] > 0;
-                return `<div class="g-card ${owned?'':'locked'}">
-                    <div style="font-size:30px">${it.i}</div>
-                    <div style="color:${RARITIES[it.r].c}; font-size:10px; font-weight:bold;">${it.r}</div>
-                    <div style="font-size:12px">${it.n}</div>
-                    <div style="font-size:9px; opacity:0.5;">1/${RARITIES[it.r].w.toLocaleString()}</div>
-                </div>`;
-            }).join('');
-            document.getElementById('gallery-overlay').style.display = 'flex';
-        }
-
-        function checkPerks() {
-            let mult = 1.0;
-            PERKS.forEach(p => { if(state.rolls >= p.req) mult = p.mult || mult; });
-            state.luck = mult;
-        }
-
-        function updateUI() {
-            document.getElementById('roll-display').innerText = `ROLLS: ${state.rolls}`;
-            document.getElementById('luck-display').innerText = `LUCK: ${state.luck.toFixed(1)}x`;
-            document.getElementById('inv-list').innerHTML = Object.entries(state.inv).reverse().slice(0,8).map(([n,c])=>{
-                const it = ITEMS.find(x=>x.n===n);
-                return `<div style="color:${RARITIES[it.r].c}">${it.i} ${n} x${c}</div>`;
-            }).join('');
-            document.getElementById('perk-list').innerHTML = PERKS.map(p=>`<div style="opacity:${state.rolls>=p.req?1:0.3}">${p.n} (${p.req})</div>`).join('');
         }
 
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
