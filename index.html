@@ -22,22 +22,15 @@
 
         .overlay { position: fixed; inset: 0; background: #000; z-index: 4000; display: none; flex-direction: column; padding: 40px; }
 
-        /* --- START PAGE --- */
+        /* --- LOGIN SCREEN --- */
         #start-screen {
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: radial-gradient(circle, #001a2e 0%, #01060f 100%);
         }
-        #hunter-name-input {
-            padding: 15px 25px; border-radius: 30px; border: 2px solid var(--accent);
-            background: rgba(0, 242, 255, 0.05); color: white; font-size: 1.2rem;
-            outline: none; text-align: center; width: 250px; margin-top: 20px;
-        }
-
-        /* --- ID CARD --- */
-        .id-card {
-            width: 350px; background: linear-gradient(135deg, #001a2e 0%, #000 100%);
-            border: 2px solid var(--accent); border-radius: 15px; padding: 20px;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); margin: auto;
+        .login-box { background: rgba(0, 242, 255, 0.05); padding: 30px; border-radius: 20px; border: 1px solid var(--accent); text-align: center; }
+        input {
+            display: block; margin: 10px auto; padding: 12px; border-radius: 10px; border: 1px solid #333;
+            background: #000; color: white; width: 220px; text-align: center;
         }
 
         /* --- SHARK ENGINE --- */
@@ -47,8 +40,7 @@
         .shark-body { width: 130px; height: 55px; border-radius: 50% 50% 40% 40%; left: 85px; }
         .shark-fin { width: 0; height: 0; border-left: 25px solid transparent; border-right: 25px solid transparent; border-bottom: 45px solid var(--accent); top: -30px; left: 125px; }
         .shark-tail { width: 0; height: 0; border-top: 30px solid transparent; border-bottom: 30px solid transparent; border-left: 45px solid var(--accent); left: 50px; animation: tail-wag 0.6s infinite ease-in-out; }
-        .shark-eye { width: 7px; height: 7px; background: black; border-radius: 50%; top: 15px; right: 25px; position: absolute; }
-
+        
         @keyframes global-swim { 0%, 100% { transform: translateX(-20px); } 50% { transform: translateX(20px); } }
         @keyframes tail-wag { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(45deg); } }
         .fast-swim { animation-duration: 0.15s !important; }
@@ -60,23 +52,19 @@
         .p-content { flex:1; overflow-y: auto; padding: 15px; }
 
         .btn { padding: 10px 20px; cursor: pointer; border-radius: 8px; border: 1px solid var(--accent); background: transparent; color: white; font-weight: bold; margin: 5px; }
-        #roll-btn { padding: 25px 80px; font-size: 1.6rem; border-radius: 60px; background: #fff; color: #000; font-weight: 900; border: none; box-shadow: 0 0 30px var(--accent); cursor: pointer; margin-top: 40px; }
+        #roll-btn { padding: 25px 80px; font-size: 1.6rem; border-radius: 60px; background: #fff; color: #000; font-weight: 900; border: none; box-shadow: 0 0 30px var(--accent); cursor: pointer; }
         
-        .g-card { background: rgba(255,255,255,0.03); border: 1px solid #222; border-radius: 12px; padding: 15px; text-align: center; }
-        .g-card.locked { opacity: 0.1; filter: grayscale(1); }
+        .g-card { background: rgba(255,255,255,0.03); border: 1px solid #222; border-radius: 12px; padding: 10px; text-align: center; }
+        .g-card.locked { opacity: 0.15; filter: grayscale(1); }
 
         /* --- CATCH REVEAL --- */
-        #reveal { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; 
-            display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-        }
-        #rev-icon { font-size: 120px; margin-bottom: 20px; }
-        #rev-name { font-size: 3.5rem; font-weight: 900; text-transform: uppercase; margin: 10px 0; }
-        .prehistoric-glow { filter: drop-shadow(0 0 30px #ffffff); animation: glow-pulse 1s infinite alternate; }
-        @keyframes glow-pulse { from { filter: drop-shadow(0 0 20px #fff); } to { filter: drop-shadow(0 0 50px var(--accent)); } }
+        #reveal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        #rev-icon { font-size: 120px; }
+        .prehistoric-glow { filter: drop-shadow(0 0 40px #fff); animation: p-glow 1s infinite alternate; }
+        @keyframes p-glow { from { filter: drop-shadow(0 0 20px #fff); } to { filter: drop-shadow(0 0 60px var(--accent)); } }
 
         .lb-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222; }
-        .perk-row { padding: 10px; margin-bottom: 5px; border-radius: 5px; border: 1px solid #333; font-size: 0.8rem; }
+        .perk-row { padding: 10px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #333; font-size: 0.8rem; }
         .unlocked { border-color: var(--accent); background: rgba(0, 242, 255, 0.1); }
     </style>
 </head>
@@ -85,71 +73,58 @@
     <audio id="bg-music" loop><source src="The OneUps - Super Mario Kart - Koopa Beach.mp3" type="audio/mpeg"></audio>
 
     <div id="start-screen" class="overlay" style="display:flex;">
-        <h1 style="font-size: 5rem; letter-spacing: 20px; color: var(--accent); margin: 0;">SHARK RNG</h1>
-        <p>Your progress is saved automatically!</p>
-        <input type="text" id="hunter-name-input" placeholder="ENTER NAME" maxlength="12">
-        <button id="roll-btn" onclick="beginGame()">START HUNT</button>
+        <h1 style="font-size: 4rem; letter-spacing: 15px; color: var(--accent); margin: 0;">SHARK RNG</h1>
+        <div class="login-box">
+            <p>Enter details to Load or Create account</p>
+            <input type="text" id="user-input" placeholder="USERNAME" maxlength="12">
+            <input type="password" id="pass-input" placeholder="PASSWORD">
+            <button id="roll-btn" style="font-size:1.2rem; padding:15px 40px;" onclick="beginGame()">LOG IN & HUNT</button>
+        </div>
     </div>
 
     <div id="reveal" onclick="closeReveal()">
         <div id="rev-icon">🦈</div>
-        <div id="rev-name">SHARK NAME</div>
-        <div id="rev-odds">1 / 100</div>
-        <div style="margin-top:40px; opacity:0.4;">CLICK TO CLAIM</div>
-    </div>
-
-    <div id="profile-overlay" class="overlay" style="justify-content:center; align-items:center;">
-        <div class="id-card">
-            <h3 style="text-align:center; color:var(--accent); margin-top:0;">ABYSSAL ID</h3>
-            <div style="display:flex; align-items:center; gap:20px;">
-                <div id="id-pfp-icon" style="font-size:4rem;">👤</div>
-                <div>
-                    <b style="color:var(--accent)">NAME:</b> <span id="id-card-name">---</span><br>
-                    <b style="color:var(--accent)">ID:</b> <span id="id-card-num">#0000</span><br>
-                    <b style="color:var(--accent)">STATUS:</b> <span style="color:#00ff00">ACTIVE</span>
-                </div>
-            </div>
-        </div>
-        <button class="btn" style="margin-top:20px" onclick="closeOverlay('profile-overlay')">CLOSE</button>
+        <h1 id="rev-name">---</h1>
+        <h2 id="rev-odds">1 / 0</h2>
+        <p style="opacity:0.5;">CLICK TO CONTINUE</p>
     </div>
 
     <div id="gallery-overlay" class="overlay">
-        <h2 style="color:var(--accent)">COLLECTION BOOK</h2>
-        <div id="gallery-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:15px; overflow-y:auto; padding-bottom:40px;"></div>
+        <h2>COLLECTION BOOK</h2>
+        <div id="gallery-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(110px,1fr)); gap:10px; overflow-y:auto; flex:1;"></div>
         <button class="btn" onclick="closeOverlay('gallery-overlay')">BACK</button>
     </div>
 
     <div id="leaderboard-overlay" class="overlay">
-        <h2 style="color:var(--accent)">TOP HUNTERS</h2>
+        <h2>GLOBAL RANKINGS</h2>
         <div id="lb-list" style="flex:1; overflow-y:auto;"></div>
         <button class="btn" onclick="closeOverlay('leaderboard-overlay')">CLOSE</button>
     </div>
 
     <div id="main-game" style="display:none; height:100%; flex-direction:column; align-items:center; padding:20px;">
         <div class="side-panel" id="inventory-panel">
-            <div style="padding:15px; background:rgba(0,242,255,0.1); font-weight:bold; text-align:center;">RECENT CATCHES</div>
+            <div style="padding:15px; background:rgba(0,242,255,0.1); font-weight:bold; text-align:center;">INVENTORY</div>
             <div id="inv-list" class="p-content"></div>
-            <button class="btn" onclick="openGallery()">COLLECTION BOOK</button>
+            <button class="btn" onclick="openGallery()">COLLECTION</button>
         </div>
 
         <div style="text-align:center;">
-            <h2 style="color:var(--accent); letter-spacing:5px;">LUCK: <span id="stat-luck">1.0</span>x</h2>
+            <h2 id="luck-display" style="color:var(--accent); letter-spacing:3px;">LUCK: 1.0x</h2>
             <div id="shark-container">
                 <div id="shark-engine">
                     <div class="shark-tail shark-part"></div>
-                    <div class="shark-body shark-part"><div class="shark-eye"></div></div>
+                    <div class="shark-body shark-part"></div>
                     <div class="shark-fin shark-part"></div>
                 </div>
                 <button id="roll-btn" onclick="roll()">DROP BAIT</button>
                 <div id="auto-status" style="color:#4caf50; font-weight:bold; display:none; margin-top:10px;">AUTO-ROLLING</div>
-                <p>ROLLS: <span id="stat-rolls">0</span></p>
-                <button class="btn" onclick="openProfile()">PROFILE</button>
+                <h3 id="roll-display">ROLLS: 0</h3>
                 <button class="btn" onclick="openLeaderboard()">LEADERBOARD</button>
             </div>
         </div>
 
         <div class="side-panel" id="perks-panel">
-            <div style="padding:15px; background:rgba(0,242,255,0.1); font-weight:bold; text-align:center;">ASCENSION PERKS</div>
+            <div style="padding:15px; background:rgba(0,242,255,0.1); font-weight:bold; text-align:center;">PERKS</div>
             <div id="perk-list" class="p-content"></div>
         </div>
     </div>
@@ -168,47 +143,48 @@
         const ITEMS = [
             { n: "Tiny Guppy", i: "🐟", r: "COMMON" }, { n: "Old Boot", i: "🥾", r: "COMMON" },
             { n: "Baby Shark", i: "🦈", r: "UNCOMMON" }, { n: "Seaweed", i: "🌿", r: "UNCOMMON" },
-            { n: "Crab King", i: "🦀", r: "RARE" }, { n: "Electric Eel", i: "🐍", r: "RARE" },
-            { n: "Giant Squid", i: "🦑", r: "EPIC" }, { n: "Treasure Chest", i: "🪙", r: "EPIC" },
-            { n: "Great White", i: "🦈", r: "LEGENDARY" }, { n: "Whale Shark", i: "🐋", r: "LEGENDARY" },
-            { n: "Magma Shark", i: "🌋", r: "ABYSSAL" }, { n: "Ghost Shark", i: "👻", r: "ABYSSAL" },
-            { n: "Poseidon Fork", i: "🔱", r: "SUNKEN" }, { n: "Megalodon", i: "🦴", r: "PREHISTORIC" }
+            { n: "Crab King", i: "🦀", r: "RARE" }, { n: "Electric Eel", i: "🐍", r: "RARE" }, { n: "Golden Hook", i: "🪝", r: "RARE" },
+            { n: "Giant Squid", i: "🦑", r: "EPIC" }, { n: "Zombie Shark", i: "🧟", r: "EPIC" }, { n: "Treasure", i: "🪙", r: "EPIC" },
+            { n: "Great White", i: "🦈", r: "LEGENDARY" }, { n: "Cyber Shark", i: "🤖", r: "LEGENDARY" }, { n: "Whale Shark", i: "🐋", r: "LEGENDARY" },
+            { n: "Magma Shark", i: "🌋", r: "ABYSSAL" }, { n: "Ghost Shark", i: "👻", r: "ABYSSAL" }, { n: "Void Ray", i: "🌌", r: "ABYSSAL" },
+            { n: "Poseidon Fork", i: "🔱", r: "SUNKEN" }, { n: "Atlantis Key", i: "🔑", r: "SUNKEN" }, { n: "Sunken Anchor", i: "⚓", r: "SUNKEN" },
+            { n: "Megalodon", i: "🦴", r: "PREHISTORIC" }, { n: "Mosasaurus", i: "🐊", r: "PREHISTORIC" }, { n: "Ancient God", i: "🌀", r: "PREHISTORIC" }
         ];
 
         const PERKS = [
-            { id: 'p1', n: 'Shiny Lure', d: '+1.5x Luck', req: 25, mult: 1.5 },
-            { id: 'p2', n: 'AUTO-ROLL', d: 'Idle Hunting', req: 50, auto: true },
-            { id: 'p3', n: 'Abyssal Light', d: '+3.0x Luck', req: 150, mult: 3.0 },
-            { id: 'p4', n: 'Double Bait', d: '+5.0x Luck', req: 300, mult: 5.0 },
-            { id: 'p5', n: 'Sonar Radar', d: '+10.0x Luck', req: 750, mult: 10.0 },
-            { id: 'p6', n: 'Abyssal Magnet', d: '+20.0x Luck', req: 2000, mult: 20.0 },
-            { id: 'p7', n: 'Oceanic God', d: '+35.0x Luck', req: 5000, mult: 35.0 },
-            { id: 'p8', n: 'Dev Blessing', d: '+50.0x Luck', req: 10000, mult: 50.0 }
+            { n: 'Shiny Lure', req: 25, mult: 1.5 },
+            { n: 'AUTO-ROLL', req: 50, auto: true },
+            { n: 'Abyssal Light', req: 150, mult: 3.0 },
+            { n: 'Double Bait', req: 300, mult: 5.0 },
+            { n: 'Sonar Radar', req: 750, mult: 10.0 },
+            { n: 'Abyssal Magnet', req: 2000, mult: 20.0 },
+            { n: 'Oceanic God', req: 5000, mult: 35.0 },
+            { n: 'Dev Blessing', req: 10000, mult: 50.0 }
         ];
 
-        let state = { rolls: 0, inv: {}, luck: 1.0, name: "Hunter", id: "0000", pfp: "🐙", isAuto: false, rolling: false };
+        let state = { rolls: 0, inv: {}, luck: 1.0, name: "", pass: "", isAuto: false, rolling: false };
 
-        function saveGame() { localStorage.setItem('sharkRNG_save', JSON.stringify(state)); }
-        function loadGame() {
-            const save = localStorage.getItem('sharkRNG_save');
-            if (save) {
-                state = JSON.parse(save);
-                state.rolling = false; // Reset rolling state just in case
-                document.getElementById('hunter-name-input').value = state.name;
-            }
-        }
-
-        function beginGame() {
-            let val = document.getElementById('hunter-name-input').value.trim();
-            if(val) state.name = val.replace(/\s/g, '');
-            if(state.id === "0000") state.id = Math.floor(1000 + Math.random() * 9000);
+        async function beginGame() {
+            const u = document.getElementById('user-input').value.trim();
+            const p = document.getElementById('pass-input').value.trim();
+            if(!u || !p) return alert("Enter Name & Password!");
             
-            document.getElementById('id-card-name').innerText = state.name;
-            document.getElementById('id-card-num').innerText = "#" + state.id;
+            state.name = u; state.pass = p;
+            
+            // Try to LOAD from leaderboard
+            const res = await fetch(`https://www.dreamlo.com/lb/${PUBLIC_KEY}/json`);
+            const data = await res.json();
+            if(data.dreamlo.leaderboard) {
+                let e = data.dreamlo.leaderboard.entry;
+                if(!Array.isArray(e)) e = [e];
+                const myEntry = e.find(x => x.name === state.name);
+                if(myEntry) state.rolls = parseInt(myEntry.score);
+            }
+
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('main-game').style.display = 'flex';
             document.getElementById('bg-music').play();
-            submitScore(); // Initialize Leaderboard
+            checkPerks();
             updateUI();
         }
 
@@ -223,16 +199,14 @@
                 let tier = "COMMON";
                 const sorted = Object.keys(RARITIES).sort((a,b) => RARITIES[b].w - RARITIES[a].w);
                 for (let r of sorted) {
-                    if (Math.random() < (1 / (r === "COMMON" ? 1 : RARITIES[r].w / state.luck))) { 
-                        tier = r; break; 
-                    }
+                    if (Math.random() < (1 / (r === "COMMON" ? 1 : RARITIES[r].w / state.luck))) { tier = r; break; }
                 }
 
                 const pool = ITEMS.filter(i => i.r === tier);
                 const item = pool[Math.floor(Math.random() * pool.length)];
                 state.inv[item.n] = (state.inv[item.n] || 0) + 1;
 
-                if (state.rolls % 10 === 0) { submitScore(); saveGame(); }
+                if (state.rolls % 10 === 0) submitScore();
                 checkPerks();
                 updateUI();
 
@@ -242,15 +216,13 @@
         }
 
         function showReveal(item) {
-            const rev = document.getElementById('reveal');
             const icon = document.getElementById('rev-icon');
             icon.innerText = item.i;
+            icon.className = (item.r === "PREHISTORIC") ? "prehistoric-glow" : "";
             document.getElementById('rev-name').innerText = item.n;
             document.getElementById('rev-name').style.color = RARITIES[item.r].c;
             document.getElementById('rev-odds').innerText = `1 / ${RARITIES[item.r].w.toLocaleString()}`;
-            
-            icon.className = (item.r === "PREHISTORIC" || item.r === "ABYSSAL") ? "prehistoric-glow" : "";
-            rev.style.display = 'flex';
+            document.getElementById('reveal').style.display = 'flex';
             if (state.isAuto) setTimeout(closeReveal, 1000);
         }
 
@@ -276,10 +248,10 @@
         }
 
         function updateUI() {
-            document.getElementById('stat-rolls').innerText = state.rolls;
-            document.getElementById('stat-luck').innerText = state.luck.toFixed(1);
+            document.getElementById('roll-display').innerText = `ROLLS: ${state.rolls}`;
+            document.getElementById('luck-display').innerText = `LUCK: ${state.luck.toFixed(1)}x`;
             const inv = document.getElementById('inv-list');
-            inv.innerHTML = Object.entries(state.inv).reverse().slice(0, 10).map(([n, c]) => {
+            inv.innerHTML = Object.entries(state.inv).reverse().slice(0, 12).map(([n, c]) => {
                 const it = ITEMS.find(x => x.n === n);
                 return `<div style="color:${RARITIES[it.r].c}">${it.i} ${n} x${c}</div>`;
             }).join('');
@@ -287,7 +259,7 @@
             const pl = document.getElementById('perk-list');
             pl.innerHTML = PERKS.map(p => `
                 <div class="perk-row ${state.rolls >= p.req ? 'unlocked' : ''}">
-                    <b>${p.n}</b><br>${p.d} (${p.req} Rolls)
+                    <b>${p.n}</b> (${p.req} Rolls)
                 </div>
             `).join('');
         }
@@ -297,9 +269,8 @@
             grid.innerHTML = ITEMS.map(it => {
                 const owned = state.inv[it.n] > 0;
                 return `<div class="g-card ${owned ? '' : 'locked'}">
-                    <span style="font-size:2rem">${it.i}</span><br>
-                    <b style="color:${owned ? RARITIES[it.r].c : '#444'}">${it.n}</b><br>
-                    <small style="opacity:0.5; font-size:0.6rem;">1/${RARITIES[it.r].w.toLocaleString()}</small>
+                    <span style="font-size:1.5rem">${it.i}</span><br>
+                    <small style="color:${owned ? RARITIES[it.r].c : '#444'}">${it.n}</small>
                 </div>`;
             }).join('');
             document.getElementById('gallery-overlay').style.display = 'flex';
@@ -307,21 +278,15 @@
 
         function openLeaderboard() {
             document.getElementById('leaderboard-overlay').style.display = 'flex';
-            document.getElementById('lb-list').innerHTML = "Fetching...";
-            fetch(`https://www.dreamlo.com/lb/${PUBLIC_KEY}/json`)
-                .then(r => r.json()).then(d => {
-                    if (!d.dreamlo.leaderboard) { document.getElementById('lb-list').innerHTML = "No Legends Yet!"; return; }
-                    let e = d.dreamlo.leaderboard.entry;
-                    if(!Array.isArray(e)) e = [e];
-                    document.getElementById('lb-list').innerHTML = e.map(i => `<div class="lb-row"><span>${i.name}</span><span>${i.score} Rolls</span></div>`).join('');
-                });
+            fetch(`https://www.dreamlo.com/lb/${PUBLIC_KEY}/json`).then(r => r.json()).then(d => {
+                let e = d.dreamlo.leaderboard.entry;
+                if(!Array.isArray(e)) e = [e];
+                document.getElementById('lb-list').innerHTML = e.map(i => `<div class="lb-row"><span>${i.name}</span><span>${i.score}</span></div>`).join('');
+            });
         }
 
-        function openProfile() { document.getElementById('profile-overlay').style.display = 'flex'; }
         function submitScore() { fetch(`https://www.dreamlo.com/lb/${PRIVATE_KEY}/add/${state.name}/${state.rolls}`); }
         function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
-        
-        loadGame();
     </script>
 </body>
 </html>
