@@ -3,353 +3,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHARK RNG: Abyssal Depths</title>
+    <title>SHARK RNG | Abyssal King Edition</title>
     <style>
         :root {
-            --bg: #020b1a;
-            --water: #0077be;
+            --bg: #01060f;
             --accent: #00f2ff;
-            --panel: rgba(0, 20, 40, 0.9);
-            
+            --panel: rgba(0, 15, 30, 0.95);
             /* Rarity Colors */
-            --common: #a0a0a0;
-            --uncommon: #4caf50;
-            --rare: #2196f3;
-            --epic: #9c27b0;
-            --legendary: #ffc107;
-            --abyssal: #ff3d00;
-            --sunken: #00ffcc;
-            --prehistoric: #ffffff;
+            --c-common: #a0a0a0; --c-uncommon: #4caf50; --c-rare: #2196f3;
+            --c-epic: #9c27b0; --c-legendary: #ffc107; --c-abyssal: #ff3d00;
+            --c-sunken: #00ffcc; --c-prehistoric: #ffffff;
         }
 
         body, html {
             margin: 0; padding: 0; height: 100%;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg); color: white; overflow: hidden;
-            user-select: none;
+            background: var(--bg); color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; user-select: none;
+        }
+
+        /* --- AUDIO & UTILITY --- */
+        #mute-btn {
+            position: fixed; top: 10px; right: 10px; z-index: 5000;
+            padding: 8px 15px; background: rgba(255,255,255,0.1);
+            border: 1px solid var(--accent); color: white; border-radius: 5px; cursor: pointer;
         }
 
         /* --- START SCREEN --- */
         #start-screen {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: radial-gradient(circle, #051937, #000c1d);
-            z-index: 1000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; transition: 0.8s;
+            position: fixed; inset: 0; background: radial-gradient(circle, #0a2e5c, #01060f);
+            z-index: 4000; display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        #start-screen h1 { font-size: 4rem; margin: 0; text-shadow: 0 0 20px var(--accent); letter-spacing: 10px; }
-        .start-btn {
-            margin-top: 30px; padding: 15px 50px; font-size: 1.5rem;
-            background: transparent; border: 2px solid var(--accent);
-            color: var(--accent); cursor: pointer; border-radius: 50px;
-            transition: 0.3s; font-weight: bold;
-        }
-        .start-btn:hover { background: var(--accent); color: black; box-shadow: 0 0 30px var(--accent); }
+        .title-card { font-size: 5rem; font-weight: 900; letter-spacing: 20px; color: var(--accent); text-shadow: 0 0 30px var(--accent); margin: 0; }
+        .start-btn { margin-top: 50px; padding: 20px 80px; font-size: 1.5rem; background: transparent; border: 2px solid var(--accent); color: var(--accent); border-radius: 50px; cursor: pointer; transition: 0.3s; font-weight: 900; }
+        .start-btn:hover { background: var(--accent); color: black; box-shadow: 0 0 50px var(--accent); }
 
-        /* --- THE SHARK TANK (3D Fin) --- */
-        .tank-container {
-            position: relative; width: 300px; height: 300px;
-            perspective: 600px; display: flex; justify-content: center; align-items: center;
+        /* --- THE GEOMETRIC SHARK --- */
+        .shark-container {
+            position: relative; width: 300px; height: 150px;
+            display: flex; justify-content: center; align-items: center;
+            animation: global-swim 4s infinite ease-in-out;
         }
-        .ocean-glow {
-            position: absolute; width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(0,242,255,0.1) 0%, transparent 70%);
-            animation: pulse 4s infinite alternate;
-        }
-        .shark-pivot {
-            width: 100px; height: 100px; transform-style: preserve-3d;
-            animation: swim 4s infinite ease-in-out;
-        }
-        .fin {
-            width: 0; height: 0; 
-            border-left: 40px solid transparent;
-            border-right: 40px solid transparent;
-            border-bottom: 80px solid var(--accent);
-            transform: rotateX(20deg);
-            filter: drop-shadow(0 0 15px var(--accent));
-        }
+        .shark-part { position: absolute; background: var(--accent); transition: 0.3s; box-shadow: 0 0 20px var(--accent); }
+        .shark-body { width: 120px; height: 50px; border-radius: 50% 50% 40% 40%; left: 80px; }
+        .shark-fin { width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 40px solid var(--accent); top: -25px; left: 120px; }
+        .shark-tail { width: 0; height: 0; border-top: 25px solid transparent; border-bottom: 25px solid transparent; border-left: 40px solid var(--accent); left: 50px; animation: tail-wag 0.5s infinite ease-in-out; }
+        .shark-eye { width: 6px; height: 6px; background: black; border-radius: 50%; top: 15px; right: 25px; position: absolute; }
 
-        @keyframes swim {
-            0% { transform: rotateY(-30deg) translateX(-20px); }
-            50% { transform: rotateY(30deg) translateX(20px); }
-            100% { transform: rotateY(-30deg) translateX(-20px); }
-        }
-        @keyframes pulse { from { opacity: 0.3; } to { opacity: 0.7; } }
+        @keyframes global-swim { 0%, 100% { transform: translateX(-30px) rotate(-2deg); } 50% { transform: translateX(30px) rotate(2deg); } }
+        @keyframes tail-wag { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(40deg); } }
+        .fast-swim { animation-duration: 0.3s !important; }
 
-        /* --- UI LAYOUT --- */
-        #main-game { display: none; height: 100%; flex-direction: column; justify-content: space-between; padding: 20px; }
+        /* --- MAIN UI & PANELS --- */
+        #main-game { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 0; }
         
-        .top-bar { text-align: center; }
-        .stat-box { font-family: monospace; font-size: 1.2rem; color: var(--accent); }
-
         .side-panel {
-            position: absolute; top: 100px; width: 260px; height: 65%;
-            background: var(--panel); border: 1px solid rgba(0,242,255,0.2);
-            border-radius: 15px; display: flex; flex-direction: column; overflow: hidden;
+            position: absolute; top: 100px; bottom: 100px; width: 300px;
+            background: var(--panel); border: 1px solid rgba(0, 242, 255, 0.2);
+            border-radius: 20px; display: flex; flex-direction: column; overflow: hidden;
+            backdrop-filter: blur(10px);
         }
-        #inventory { left: 20px; }
-        #upgrades { right: 20px; }
-        .p-title { padding: 15px; background: rgba(0,242,255,0.1); text-align: center; font-weight: bold; }
-        .p-content { flex: 1; overflow-y: auto; padding: 10px; }
+        #inventory-panel { left: 20px; }
+        #perks-panel { right: 20px; }
+        .p-head { padding: 15px; background: rgba(0, 242, 255, 0.1); text-align: center; font-weight: bold; font-size: 1.1rem; }
+        .p-content { flex: 1; overflow-y: auto; padding: 15px; }
 
-        /* --- REVEAL OVERLAY --- */
-        #reveal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 500; display: none;
-            flex-direction: column; justify-content: center; align-items: center;
-            animation: fadeIn 0.3s;
+        /* --- COLLECTION BOOK (THE GALLERY) --- */
+        #gallery-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 3500; display: none;
+            flex-direction: column; padding: 50px;
         }
-        #reveal-icon { font-size: 8rem; margin-bottom: 10px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        #reveal-name { font-size: 3rem; font-weight: 900; text-transform: uppercase; }
-        #reveal-rarity { letter-spacing: 5px; margin-top: 10px; }
-
-        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Items */
-        .item-row {
-            display: flex; align-items: center; gap: 10px; padding: 8px;
-            background: rgba(255,255,255,0.05); margin-bottom: 5px; border-radius: 5px;
-            font-size: 0.9rem;
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px; margin-top: 30px; overflow-y: auto;
         }
-
-        /* Perks */
-        .perk-card {
-            padding: 10px; border: 1px solid #333; border-radius: 5px; margin-bottom: 10px;
-            opacity: 0.4; transition: 0.3s;
+        .gallery-card {
+            background: rgba(255,255,255,0.03); border: 1px solid #333;
+            border-radius: 10px; padding: 20px; text-align: center; transition: 0.3s;
         }
-        .perk-card.bought { opacity: 1; border-color: var(--accent); background: rgba(0,242,255,0.05); }
+        .gallery-card.locked { filter: grayscale(1) brightness(0.3); }
+        .gallery-card.locked .g-icon { opacity: 0.1; }
+        .gallery-card .g-icon { font-size: 3rem; margin-bottom: 10px; }
 
-        /* Roll Button */
-        .roll-area { text-align: center; margin-bottom: 40px; }
+        /* --- REVEAL --- */
+        #reveal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 5000; display: none; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; animation: fadeIn 0.4s;
+        }
+        #rev-icon { font-size: 150px; filter: drop-shadow(0 0 30px var(--accent)); }
+        #rev-name { font-size: 5rem; font-weight: 900; margin: 20px 0; }
+        #rev-odds { font-size: 2rem; font-family: monospace; color: #888; }
+
+        /* --- PERKS --- */
+        .perk-item {
+            padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px;
+            margin-bottom: 10px; border: 1px solid #222; opacity: 0.5;
+        }
+        .perk-item.unlocked { opacity: 1; border-color: var(--accent); background: rgba(0, 242, 255, 0.05); }
+        .perk-item h4 { margin: 0; color: var(--accent); }
+        .perk-item p { margin: 5px 0 0; font-size: 0.8rem; color: #ccc; }
+
+        /* BUTTONS */
         #roll-btn {
-            padding: 20px 80px; font-size: 1.5rem; font-weight: bold;
-            background: var(--accent); color: black; border: none;
-            border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px var(--accent);
+            padding: 25px 100px; font-size: 1.8rem; border-radius: 60px;
+            background: white; color: black; font-weight: 900; border: none;
+            cursor: pointer; box-shadow: 0 0 40px rgba(0,242,255,0.4);
         }
-        #roll-btn:disabled { background: #444; box-shadow: none; cursor: wait; }
+        #roll-btn:disabled { opacity: 0.5; cursor: wait; }
+        .nav-btn { background: #111; color: white; border: 1px solid #444; padding: 10px 20px; cursor: pointer; margin: 5px; border-radius: 5px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
+    <audio id="bg-music" loop>
+        <source src="The OneUps - Super Mario Kart - Koopa Beach.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="click-sfx">
+        <source src="Click Sound Effect (HD).mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="mute-btn" onclick="toggleMusic()">🔈 Music: OFF</button>
+
     <div id="start-screen">
-        <h1>SHARK RNG</h1>
-        <p>Explore the Abyssal Depths</p>
-        <button class="start-btn" onclick="startGame()">ENTER THE WATER</button>
+        <h1 class="title-card">SHARK RNG</h1>
+        <p style="letter-spacing: 5px; opacity: 0.7;">BEYOND THE DEPTHS</p>
+        <button class="start-btn" onclick="beginGame()">BEGIN HUNT</button>
     </div>
 
-    <div id="reveal-overlay" onclick="closeReveal()">
-        <div id="reveal-icon">🦈</div>
-        <div id="reveal-name">Baby Shark</div>
-        <div id="reveal-rarity">COMMON</div>
-        <p style="margin-top: 40px; color: #888;">Click to continue</p>
+    <div id="gallery-overlay">
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <h1 style="color: var(--accent);">COLLECTION BOOK</h1>
+            <button class="nav-btn" onclick="toggleGallery()">BACK TO GAME</button>
+        </div>
+        <div class="gallery-grid" id="gallery-container"></div>
+    </div>
+
+    <div id="reveal" onclick="closeReveal()">
+        <div id="rev-icon">🦈</div>
+        <div id="rev-name">SHARK NAME</div>
+        <div id="rev-odds">1/100</div>
+        <p style="margin-top: 50px; color: #555;">CLICK ANYWHERE TO DISMISS</p>
     </div>
 
     <div id="main-game">
-        <div class="top-bar">
-            <div class="stat-box">ROLLS: <span id="val-rolls">0</span> | LUCK: <span id="val-luck">1.0</span>x</div>
-        </div>
-
-        <div id="inventory" class="side-panel">
-            <div class="p-title">COLLECTION</div>
+        <div class="side-panel" id="inventory-panel">
+            <div class="p-head">RECENT CATCHES</div>
             <div class="p-content" id="inv-list"></div>
+            <button class="nav-btn" style="margin: 10px;" onclick="toggleGallery()">OPEN COLLECTION BOOK</button>
         </div>
 
-        <div style="display: flex; justify-content: center; align-items: center; flex: 1;">
-            <div class="tank-container">
-                <div class="ocean-glow"></div>
-                <div class="shark-pivot">
-                    <div class="fin"></div>
+        <div style="text-align: center; z-index: 5;">
+            <p style="font-family: monospace; color: var(--accent);">LUCK MULTIPLIER: <span id="stat-luck">1.0</span>x</p>
+            <div class="shark-container" id="shark-engine">
+                <div class="shark-tail shark-part"></div>
+                <div class="shark-body shark-part">
+                    <div class="shark-eye"></div>
                 </div>
+                <div class="shark-fin shark-part"></div>
+            </div>
+            <div style="margin-top: 80px;">
+                <button id="roll-btn" onclick="dropBait()">DROP BAIT</button>
+                <h2 style="margin-top: 20px;">ROLLS: <span id="stat-rolls">0</span></h2>
             </div>
         </div>
 
-        <div id="upgrades" class="side-panel">
-            <div class="p-title">PERKS</div>
-            <div class="p-content">
-                <div class="perk-card" id="pk-1"><b>Turbo Fins</b><br><small>Roll 2x faster (10 Rolls)</small></div>
-                <div class="perk-card" id="pk-2"><b>Sonar Sight</b><br><small>+0.5 Luck (50 Rolls)</small></div>
-                <div class="perk-card" id="pk-3"><b>Pity Magnet</b><br><small>Better Pity odds (150 Rolls)</small></div>
-                <div class="perk-card" id="pk-4"><b>Auto-Fisher</b><br><small>Auto-roll toggle (300 Rolls)</small></div>
-                <button id="auto-btn" onclick="toggleAuto()" style="display:none; width:100%; cursor:pointer;">AUTO: OFF</button>
-            </div>
-        </div>
-
-        <div class="roll-area">
-            <button id="roll-btn" onclick="roll()">DROP BAIT</button>
+        <div class="side-panel" id="perks-panel">
+            <div class="p-head">EXPANSIVE PERKS</div>
+            <div class="p-content" id="perk-list"></div>
         </div>
     </div>
 
     <script>
-        const RARITIES = {
-            COMMON: { n: "Mundane", c: "#a0a0a0", w: 5000 },
-            UNCOMMON: { n: "Curious", c: "#4caf50", w: 2500 },
-            RARE: { n: "Polished", c: "#2196f3", w: 1000 },
-            EPIC: { n: "Remarkable", c: "#9c27b0", w: 400 },
-            LEGENDARY: { n: "Mythic", c: "#ffc107", w: 100 },
-            ABYSSAL: { n: "Abyssal", c: "#ff3d00", w: 30 },
-            SUNKEN: { n: "Sunken", c: "#00ffcc", w: 5 },
-            PREHISTORIC: { n: "Prehistoric", c: "#ffffff", w: 1 }
+        const RARITY_DATA = {
+            COMMON: { n: "Mundane", c: "#a0a0a0", w: 1 },
+            UNCOMMON: { n: "Curious", c: "#4caf50", w: 5 },
+            RARE: { n: "Polished", c: "#2196f3", w: 25 },
+            EPIC: { n: "Remarkable", c: "#9c27b0", w: 100 },
+            LEGENDARY: { n: "Mythic", c: "#ffc107", w: 750 },
+            ABYSSAL: { n: "Abyssal", c: "#ff3d00", w: 5000 },
+            SUNKEN: { n: "Sunken", c: "#00ffcc", w: 25000 },
+            PREHISTORIC: { n: "Prehistoric", c: "#ffffff", w: 100000 }
         };
 
         const ITEMS = [
             { n: "Tiny Guppy", i: "🐟", r: "COMMON" },
-            { n: "Baby Shark", i: "🦈", r: "COMMON" },
             { n: "Old Boot", i: "🥾", r: "COMMON" },
-            { n: "Seaweed Bundle", i: "🌿", r: "UNCOMMON" },
-            { n: "Crab King", i: "🦀", r: "UNCOMMON" },
-            { n: "Glowing Jelly", i: "🎐", r: "RARE" },
+            { n: "Baby Shark", i: "🦈", r: "UNCOMMON" },
+            { n: "Crab King", i: "🦀", r: "RARE" },
             { n: "Electric Eel", i: "🐍", r: "RARE" },
+            { n: "Glowing Jelly", i: "🎐", r: "EPIC" },
             { n: "Treasure Chest", i: "🪙", r: "EPIC" },
-            { n: "Giant Squid", i: "🦑", r: "EPIC" },
             { n: "Great White", i: "🦈", r: "LEGENDARY" },
             { n: "Whale Shark", i: "🐋", r: "LEGENDARY" },
+            { n: "Hammerhead", i: "🔨", r: "LEGENDARY" },
             { n: "Magma Shark", i: "🌋", r: "ABYSSAL" },
             { n: "Ghost Shark", i: "👻", r: "ABYSSAL" },
-            { n: "Poseidon's Fork", i: "🔱", r: "SUNKEN" },
+            { n: "Poseidon Fork", i: "🔱", r: "SUNKEN" },
+            { n: "Atlantis Key", i: "🔑", r: "SUNKEN" },
             { n: "Megalodon", i: "🦴", r: "PREHISTORIC" }
         ];
 
-        let state = { rolls: 0, inv: {}, perks: { s:0, l:0, p:0, a:0 }, auto: false };
+        const PERKS = [
+            { id: 's1', n: 'Turbo Fins', d: 'Roll 2x Faster', req: 25, type: 'speed' },
+            { id: 'l1', n: 'Shiny Lure', d: '+1.5x Luck Boost', req: 100, type: 'luck' },
+            { id: 'p1', n: 'Magnetism', d: '1/50 odds or better are 20% easier', req: 250, type: 'pity' },
+            { id: 'a1', n: 'Auto-Fisher', d: 'Unlocks Auto-Roll Toggle', req: 500, type: 'auto' },
+            { id: 'l2', n: 'Abyssal Light', d: '+3.0x Luck Boost', req: 1000, type: 'luck' }
+        ];
 
-        function startGame() {
-            document.getElementById('start-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('start-screen').style.display = 'none';
-                document.getElementById('main-game').style.display = 'flex';
-            }, 800);
-            load();
+        let state = { rolls: 0, inv: {}, perks: [], auto: false, music: false };
+
+        function playClick() {
+            const sfx = document.getElementById('click-sfx');
+            sfx.currentTime = 0;
+            sfx.play();
         }
 
-        function roll() {
+        function toggleMusic() {
+            playClick();
+            const music = document.getElementById('bg-music');
+            const btn = document.getElementById('mute-btn');
+            if (music.paused) {
+                music.play();
+                btn.innerText = "🔊 Music: ON";
+            } else {
+                music.pause();
+                btn.innerText = "🔈 Music: OFF";
+            }
+        }
+
+        function beginGame() {
+            playClick();
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('main-game').style.display = 'flex';
+            updateUI();
+        }
+
+        function dropBait() {
             if (state.rolling) return;
+            playClick();
             state.rolling = true;
             state.rolls++;
+            
             document.getElementById('roll-btn').disabled = true;
+            document.getElementById('shark-engine').classList.add('fast-swim');
 
-            // Fin speed animation
-            document.querySelector('.shark-pivot').style.animationDuration = '0.3s';
-
-            let time = state.perks.s ? 400 : 1000;
-            setTimeout(finalizeRoll, time);
+            const rollTime = state.perks.includes('s1') ? 400 : 1000;
+            setTimeout(finalizeRoll, rollTime);
         }
 
         function finalizeRoll() {
-            let luck = 1 + (state.perks.l ? 0.5 : 0);
-            let pool = [];
-            for (let r in RARITIES) {
-                let weight = RARITIES[r].w;
-                if (r !== "COMMON") weight *= luck;
-                pool.push({k: r, w: weight});
+            let luck = 1.0;
+            if(state.perks.includes('l1')) luck = 1.5;
+            if(state.perks.includes('l2')) luck = 3.0;
+
+            const sortedTiers = Object.keys(RARITY_DATA).sort((a,b) => RARITY_DATA[b].w - RARITY_DATA[a].w);
+            let selectedTier = "COMMON";
+
+            for (let r of sortedTiers) {
+                let odds = RARITY_DATA[r].w;
+                if (r !== "COMMON") odds /= luck;
+                if (state.perks.includes('p1') && odds >= 50) odds *= 0.8;
+
+                if (Math.random() < (1 / odds)) {
+                    selectedTier = r;
+                    break;
+                }
             }
 
-            let total = pool.reduce((a, b) => a + b.w, 0);
-            let rand = Math.random() * total;
-            let tier = "COMMON";
-            for (let p of pool) {
-                if (rand < p.w) { tier = p.k; break; }
-                rand -= p.w;
-            }
-
-            const possible = ITEMS.filter(i => i.r === tier);
+            const possible = ITEMS.filter(i => i.r === selectedTier);
             const item = possible[Math.floor(Math.random() * possible.length)];
 
-            // Update state
             if (!state.inv[item.n]) state.inv[item.n] = { ...item, count: 0 };
             state.inv[item.n].count++;
 
-            // Reveal
+            document.getElementById('shark-engine').classList.remove('fast-swim');
             showReveal(item);
-            
-            // Cleanup
-            document.querySelector('.shark-pivot').style.animationDuration = '4s';
-            checkUnlocks();
+            checkPerks();
             updateUI();
-            save();
             state.rolling = false;
-
-            if (!state.auto) {
-                setTimeout(() => document.getElementById('roll-btn').disabled = false, 200);
-            }
         }
 
         function showReveal(item) {
-            const overlay = document.getElementById('reveal-overlay');
-            const icon = document.getElementById('reveal-icon');
-            const name = document.getElementById('reveal-name');
-            const rar = document.getElementById('reveal-rarity');
-
-            icon.innerText = item.i;
-            name.innerText = item.n;
-            name.style.color = RARITIES[item.r].c;
-            rar.innerText = item.r;
-            rar.style.color = RARITIES[item.r].c;
-
-            overlay.style.display = 'flex';
-            if (state.auto) {
-                setTimeout(closeReveal, 800);
-            }
+            const rev = document.getElementById('reveal');
+            document.getElementById('rev-icon').innerText = item.i;
+            document.getElementById('rev-name').innerText = item.n;
+            document.getElementById('rev-name').style.color = RARITY_DATA[item.r].c;
+            document.getElementById('rev-odds').innerText = `1 / ${RARITY_DATA[item.r].w.toLocaleString()}`;
+            rev.style.display = 'flex';
         }
 
         function closeReveal() {
-            document.getElementById('reveal-overlay').style.display = 'none';
+            playClick();
+            document.getElementById('reveal').style.display = 'none';
             if (!state.auto) document.getElementById('roll-btn').disabled = false;
         }
 
-        function checkUnlocks() {
-            if (state.rolls >= 10) state.perks.s = 1;
-            if (state.rolls >= 50) state.perks.l = 1;
-            if (state.rolls >= 150) state.perks.p = 1;
-            if (state.rolls >= 300) state.perks.a = 1;
+        function checkPerks() {
+            PERKS.forEach(p => {
+                if (state.rolls >= p.req && !state.perks.includes(p.id)) {
+                    state.perks.push(p.id);
+                }
+            });
         }
 
-        function toggleAuto() {
-            state.auto = !state.auto;
-            document.getElementById('auto-btn').innerText = state.auto ? "AUTO: ON" : "AUTO: OFF";
-            if (state.auto) autoLoop();
+        function updateUI() {
+            document.getElementById('stat-rolls').innerText = state.rolls;
+            let luck = 1.0;
+            if(state.perks.includes('l1')) luck = 1.5;
+            if(state.perks.includes('l2')) luck = 3.0;
+            document.getElementById('stat-luck').innerText = luck.toFixed(1);
+
+            // Recent List
+            const list = document.getElementById('inv-list');
+            list.innerHTML = "";
+            const recent = Object.values(state.inv).slice(-5).reverse();
+            recent.forEach(i => {
+                list.innerHTML += `<div style="padding:5px; border-bottom:1px solid #222; color:${RARITY_DATA[i.r].c}">${i.i} ${i.n} (x${i.count})</div>`;
+            });
+
+            // Perk List
+            const pList = document.getElementById('perk-list');
+            pList.innerHTML = "";
+            PERKS.forEach(p => {
+                const isOwned = state.perks.includes(p.id);
+                pList.innerHTML += `
+                    <div class="perk-item ${isOwned ? 'unlocked' : ''}">
+                        <h4>${p.n}</h4>
+                        <p>${p.d}</p>
+                        <small>${isOwned ? 'ACTIVATED' : 'Unlocks at ' + p.req + ' Rolls'}</small>
+                    </div>
+                `;
+            });
+
+            if (state.perks.includes('a1')) {
+                // Add auto button if not there
+                if (!document.getElementById('auto-toggle')) {
+                    const btn = document.createElement('button');
+                    btn.id = "auto-toggle";
+                    btn.className = "nav-btn";
+                    btn.style.width = "100%";
+                    btn.innerText = "AUTO: OFF";
+                    btn.onclick = () => {
+                        playClick();
+                        state.auto = !state.auto;
+                        btn.innerText = state.auto ? "AUTO: ON" : "AUTO: OFF";
+                        if(state.auto) autoLoop();
+                    };
+                    document.getElementById('perks-panel').appendChild(btn);
+                }
+            }
+        }
+
+        function toggleGallery() {
+            playClick();
+            const gal = document.getElementById('gallery-overlay');
+            const container = document.getElementById('gallery-container');
+            
+            if (gal.style.display === 'flex') {
+                gal.style.display = 'none';
+            } else {
+                container.innerHTML = "";
+                ITEMS.forEach(item => {
+                    const owned = state.inv[item.n];
+                    container.innerHTML += `
+                        <div class="gallery-card ${owned ? '' : 'locked'}">
+                            <div class="g-icon">${item.i}</div>
+                            <b style="color:${owned ? RARITY_DATA[item.r].c : '#444'}">${item.n}</b><br>
+                            <small>1/${RARITY_DATA[item.r].w.toLocaleString()}</small>
+                        </div>
+                    `;
+                });
+                gal.style.display = 'flex';
+            }
         }
 
         function autoLoop() {
             if (!state.auto) return;
-            roll();
-            setTimeout(autoLoop, state.perks.s ? 1500 : 2500);
-        }
-
-        function updateUI() {
-            document.getElementById('val-rolls').innerText = state.rolls;
-            document.getElementById('val-luck').innerText = (1 + (state.perks.l ? 0.5 : 0)).toFixed(1);
-
-            if(state.perks.s) document.getElementById('pk-1').classList.add('bought');
-            if(state.perks.l) document.getElementById('pk-2').classList.add('bought');
-            if(state.perks.p) document.getElementById('pk-3').classList.add('bought');
-            if(state.perks.a) {
-                document.getElementById('pk-4').classList.add('bought');
-                document.getElementById('auto-btn').style.display = 'block';
-            }
-
-            const list = document.getElementById('inv-list');
-            list.innerHTML = "";
-            const sorted = Object.values(state.inv).sort((a,b) => {
-                const order = ["PREHISTORIC", "SUNKEN", "ABYSSAL", "LEGENDARY", "EPIC", "RARE", "UNCOMMON", "COMMON"];
-                return order.indexOf(a.r) - order.indexOf(b.r);
-            });
-
-            sorted.forEach(i => {
-                list.innerHTML += `<div class="item-row" style="border-left: 3px solid ${RARITIES[i.r].c}">
-                    <span>${i.i}</span>
-                    <div style="flex:1"><b>${i.n}</b><br><small style="color:${RARITIES[i.r].c}">${i.r}</small></div>
-                    <span>x${i.count}</span>
-                </div>`;
-            });
-        }
-
-        function save() { localStorage.setItem('shark_rng_v1', JSON.stringify(state)); }
-        function load() {
-            const s = localStorage.getItem('shark_rng_v1');
-            if (s) {
-                const parsed = JSON.parse(s);
-                state = { ...state, ...parsed };
-                updateUI();
-            }
+            dropBait();
+            setTimeout(autoLoop, state.perks.includes('s1') ? 1200 : 2200);
         }
     </script>
 </body>
